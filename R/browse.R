@@ -5,7 +5,7 @@
 #' @param corpus The full GDD corpus of which \code{x} is expected to be a subset.
 #' @param pubs The bibliographic information for the GDD dataset.
 #' @importFrom dplyr left_join
-#' @example \dontrun{
+#' @examples \dontrun{
 #' subset <- sample(nrow(nlp), 100)
 #' browse(x = nlp$`_gddid`[subset],
 #'        pubs = publications,

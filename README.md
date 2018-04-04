@@ -1,6 +1,9 @@
 # geodiveR
 
-[![Coverage status](https://codecov.io/gh/EarthCubeGeochron/geodiveR/branch/master/graph/badge.svg)](https://codecov.io/github/EarthCubeGeochron/geodiveR?branch=master)
+[![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental) 
+[![Coverage status](https://codecov.io/gh/EarthCubeGeochron/geodiveR/branch/master/graph/badge.svg)](https://codecov.io/github/EarthCubeGeochron/geodiveR?branch=master) 
+[![Travis build status](https://travis-ci.org/EarthCubeGeochron/geodiveR.svg?branch=master)](https://travis-ci.org/EarthCubeGeochron/geodiveR) 
+[![Depsy](http://depsy.org/api/package/cran/geodiveR/badge.svg)](http://depsy.org/package/r/geodiveR)
 
 A placeholder for an R package to manage many of the common workflow processes within a GeoDeepDive workflow.
 
