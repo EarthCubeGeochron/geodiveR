@@ -1,9 +1,9 @@
 Package: geodiveR
 Version: 0.0.0.9000
-Title: What the Package Does (One Line, Title Case)
-Description: What the package does (one paragraph).
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-License: What license is it under?
+Title: Utilities For GeoDeepDive In R
+Description: Provides a set of functions to work with GeoDeepDive data in R.
+Authors@R: person("Simon", "Goring", email = "simon.j.goring@gmail.com", role = c("aut", "cre"))
+License: MIT
 Encoding: UTF-8
 LazyData: true
 ByteCompile: true
@@ -15,4 +15,6 @@ Suggests:
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
 Imports: 
-    magrittr
+    magrittr,
+    dplyr,
+    assertthat
