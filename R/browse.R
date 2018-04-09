@@ -1,102 +1,211 @@
 #' @title Summarize publications
 #' @description A quick view method for looking at publication data from the GeoDeepDive publications.
-#' @param x One of, a vector of character \code{gddid}s from GeoDeepDive, or a \code{data.frame} with columns \code{gddid} and \code{words}.
+#' @param x A vector of numeric \code{gddid}s from GeoDeepDive, a \code{boolean} vector where \code{length(x) == corpus}, or a \code{data.frame} with columns \code{gddid} and \code{words}.
 #' @param words A vector of sentences, similar to the GDD corpus \code{words} column.
 #' @param corpus The full GDD corpus of which \code{x} is expected to be a subset.
 #' @param pubs The bibliographic information for the GDD dataset.
 #' @importFrom dplyr left_join
 #' @examples \dontrun{
+#' # Load in sample data:
+#'
+#' data(nlp)
+#' data(publications)
+#'
 #' subset <- sample(nrow(nlp), 100)
+#'
+#' # Return only the publication information, using gddids as the key:
+#'
 #' browse(x = nlp$`_gddid`[subset],
+#'        pubs = publications)
+#'
+#' # Using a numeric or boolean index of sentences:
+#'
+#' subset <- sample(nrow(nlp), 100)
+#'
+#' browse(x = subset,
 #'        pubs = publications,
-#'        words = nlp$word[subset])
+#'        corpus = nlp)
+#'
+#' subset <- (1:nrow(nlp)) %in% subset
+#' browse(x = subset,
+#'        pubs = publications,
+#'        corpus = nlp)
 #' }
+#'
 #' @export
-
 browse <- function(x, corpus = NULL, pubs = NULL, words = NULL) {
+  UseMethod('browse')
+}
 
-  # Programming notes:
-  # I want to build this so we can pass in a data.frame either formatted as a corpus,
-  # returning the sentence, a publication ID and
+#' @title Summarize publications
+#' @export
+browse.logical <- function(x, corpus = NULL, pubs = NULL, ...) {
 
-  clean_words <- function(x) {
-    gsub("[(${)(}^)]", "", x) %>%                # Curly brakets
-      gsub("(,([\\;\\:\\%]),)","\\2 ", .) %>%
-      gsub("(([^\"]),([^\"]))", "\\2 \\3", ., perl = TRUE) %>%
-      gsub(",\",\",", ", ", .) %>%                 # Commas
-      gsub(" \\.", "\\.", .) %>%
-      gsub("-LRB-\\s", "\\(", .) %>%
-      gsub("(,-RRB-)|(\\s-RRB-)", "\\)", .) %>%
-      gsub("(,-RSB-)|(\\s-RSB-)", "\\]", .) %>%
-      gsub("-LSB-\\s", "\\[", .)
-  }
+  assertthat::assert_that(!is.null(pubs),
+                          msg = "With a numeric index you must provide a table of publications.")
 
-  # gddid and sentences were passed in:
-  if (!is.data.frame(x) & !is.null(words) & is.null(pubs)) {
+  assertthat::assert_that(!is.null(corpus),
+                          msg = "With a numeric index you must provide a table of publications.")
 
-    # The only thing that's been passed in is the gddid and words.
-    assertthat::assert_that(is.character(words) | is.factor(words),
-                            msg = "If you don't include the corpus the `words` element must be a character string. ")
-    assertthat::assert_that(length(words) == length(x),
-                            msg = "Both `words` and `x` must have the same length.")
+  assertthat::assert_that(!max(x) > nrow(corpus),
+                          msg = "With a character vector of gddids you must provide a corpus.")
 
-    output <- data.frame("gddid" = x,
-                         words = as.character(words) %>% clean_words)
+  assertthat::assert_that(any(c('gddid', '_gddid') %in% colnames(pubs)),
+                          msg = "There must be a column either `gddid` or `_gddid` in `x` if `x` is a `data.frame`")
 
-  }
+  x <- (1:nrow(corpus))[x]
+  browse(x, corpus, pubs)
+}
 
-  if(!is.data.frame(x) & !is.null(pubs) & is.null(words) & is.null(corpus)) {
-    assertthat::assert_that(all(x %in% pubs$`_gddid`),
-                            msg = "There are unique identifiers passed that are not in the publication table.")
 
-    colnames(pubs)[which(colnames(pubs) == "_gddid")] <- "gddid"
+#' @title Summarize publications
+#' @export
+browse.numeric <- function(x, corpus = NULL, pubs = NULL, ...) {
+  assertthat::assert_that(!is.null(pubs),
+                          msg = "With a numeric index you must provide a table of publications.")
 
-    pubs$doi <- paste0('<a href="http://dx.doi.org/', sapply(pubs$identifier, '[[', 'id'), '">DOI</a>')
+  assertthat::assert_that(!is.null(corpus),
+                          msg = "With a numeric index you must provide a table of publications.")
 
-    short_pub <- pubs[match(x, pubs$gddid),] %>%
-      select(gddid, title, year, journal.name, doi)
+  assertthat::assert_that(!max(x) > nrow(corpus),
+                          msg = "With a character vector of gddids you must provide a corpus.")
 
-    assertthat::assert_that(all(x == short_pub$gddid),
-                            msg = "There is a mismatch between publication and selected gddids.")
+  assertthat::assert_that(any(c('gddid', '_gddid') %in% colnames(pubs)),
+                          msg = "There must be a column either `gddid` or `_gddid` in `x` if `x` is a `data.frame`")
 
-    output <- data.frame(short_pub) %>% distinct(.keep_all = TRUE)
-  }
+  colnames(pubs)[which(colnames(pubs) == "_gddid")] <- "gddid"
+  colnames(corpus)[which(colnames(corpus) == "_gddid")] <- "gddid"
 
-  if(is.data.frame(x) & !is.null(pubs) & is.null(words) & is.null(corpus)) {
+  output <- corpus[x, ] %>%
+    dplyr::left_join(y = pubs, by = 'gddid')
 
-    assertthat::assert_that(any(c('gddid', '_gddid') %in% colnames(x)),
-                            msg = "There must be a column either `gddid` or `_gddid` in `x` if `x` is a `data.frame`")
+  output$doi <- paste0('<a href="http://dx.doi.org/', sapply(output$identifier, '[[', 'id'), '">DOI</a>')
 
-    assertthat::assert_that('word' %in% colnames(x),
-                            msg = "There must be a column `words` in `x` if `x` is a `data.frame`")
+  short_out <- output %>%
+    dplyr::select(gddid, word, title, year, journal.name, doi)
 
-    if ('_gddid' %in% colnames(x)) {
-      colnames(x)[which(colnames(x) == "_gddid")] <- "gddid"
-    }
+  short_out$words <- clean_words(short_pub$word)
 
-    colnames(pubs)[which(colnames(pubs) == "_gddid")] <- "gddid"
+  short_out$gddid <- paste0('<small><a title ="',
+                            short_out$gddid, '" href = "',
+                            short_out$gddid,'">',
+                            substr(short_out$gddid, 1, 2),
+                            '...', substr(short_out$gddid, 20, 24),
+                            '</a></small>')
 
-    pubs$doi <- paste0('<a href="http://dx.doi.org/', sapply(pubs$identifier, '[[', 'id'), '">DOI</a>')
-
-    short_pub <- dplyr::left_join(x, pubs, by = "gddid") %>%
-      select(gddid, word, title, year, journal.name, doi)
-
-    short_pub$words <- clean_words(short_pub$word)
-
-    short_pub$gddid = paste0('<small><a title ="',
-                             short_pub$gddid, '" href = "',
-                             short_pub$gddid,'">',
-                             substr(short_pub$gddid, 1, 2), '...', substr(short_pub$gddid, 20, 24),
-                             '</a></small>')
-
-    output <- data.frame(short_pub)
-  }
+  output <- data.frame(short_out)
 
   out_table <- DT::datatable(output, escape = FALSE, rownames = FALSE) %>%
-    DT::formatStyle(columns = 'word',
+    DT::formatStyle(columns = c('title','word'),
                     `word-wrap` = 'break-word',
                     `word-break` = 'break-all',
                     `white-space` = 'normal')
 
   return(out_table)
+
 }
+
+#' @title Summarize publications
+#' @export
+browse.character <- function(x, corpus = NULL, pubs = NULL, words = NULL) {
+  assertthat::assert_that(!is.null(pubs),
+                          msg = "With a character vector of gddids you must provide a table of publications.")
+
+  assertthat::assert_that(any(c('gddid', '_gddid') %in% colnames(pubs)),
+                          msg = "There must be a column either `gddid` or `_gddid` in `x` if `x` is a `data.frame`")
+
+  output <- pubs[pubs$`_gddid` %in% x,]
+
+  colnames(pubs)[which(colnames(pubs) == "_gddid")] <- "gddid"
+
+  pubs <- pubs %>% dplyr::filter(gddid %in% x)
+
+  pubs$doi <- paste0('<a href="http://dx.doi.org/', sapply(pubs$identifier, '[[', 'id'), '">DOI</a>')
+
+  short_pub <- pubs %>%
+    dplyr::select(gddid, title, year, journal.name, doi)
+
+  out_table <- DT::datatable(short_pub, escape = FALSE, rownames = FALSE) %>%
+    DT::formatStyle(columns = 'title',
+                    `word-wrap` = 'break-word',
+                    `word-break` = 'break-all',
+                    `white-space` = 'normal')
+
+  return(out_table)
+
+}
+
+#
+#   # Programming notes:
+#   # I want to build this so we can pass in a data.frame either formatted as a corpus,
+#   # returning the sentence, a publication ID and
+#
+#   # gddid and sentences were passed in:
+#   if (!is.data.frame(x) & !is.null(words) & is.null(pubs)) {
+#
+#     # The only thing that's been passed in is the gddid and words.
+#     assertthat::assert_that(is.character(words) | is.factor(words),
+#                             msg = "If you don't include the corpus the `words` element must be a character string. ")
+#     assertthat::assert_that(length(words) == length(x),
+#                             msg = "Both `words` and `x` must have the same length.")
+#
+#     output <- data.frame("gddid" = x,
+#                          words = as.character(words) %>% clean_words)
+#
+#   }
+#
+#   if(!is.data.frame(x) & !is.null(pubs) & is.null(words) & is.null(corpus)) {
+#     assertthat::assert_that(all(x %in% pubs$`_gddid`),
+#                             msg = "There are unique identifiers passed that are not in the publication table.")
+#
+#     colnames(pubs)[which(colnames(pubs) == "_gddid")] <- "gddid"
+#
+#     pubs$doi <- paste0('<a href="http://dx.doi.org/', sapply(pubs$identifier, '[[', 'id'), '">DOI</a>')
+#
+#     short_pub <- pubs[match(x, pubs$gddid),] %>%
+#       select(gddid, title, year, journal.name, doi)
+#
+#     assertthat::assert_that(all(x == short_pub$gddid),
+#                             msg = "There is a mismatch between publication and selected gddids.")
+#
+#     output <- data.frame(short_pub) %>% distinct(.keep_all = TRUE)
+#   }
+#
+#   if(is.data.frame(x) & !is.null(pubs) & is.null(words) & is.null(corpus)) {
+#
+#     assertthat::assert_that(any(c('gddid', '_gddid') %in% colnames(x)),
+#                             msg = "There must be a column either `gddid` or `_gddid` in `x` if `x` is a `data.frame`")
+#
+#     assertthat::assert_that('word' %in% colnames(x),
+#                             msg = "There must be a column `words` in `x` if `x` is a `data.frame`")
+#
+#     if ('_gddid' %in% colnames(x)) {
+#       colnames(x)[which(colnames(x) == "_gddid")] <- "gddid"
+#     }
+#
+#     colnames(pubs)[which(colnames(pubs) == "_gddid")] <- "gddid"
+#
+#     pubs$doi <- paste0('<a href="http://dx.doi.org/', sapply(pubs$identifier, '[[', 'id'), '">DOI</a>')
+#
+#     short_pub <- dplyr::left_join(x, pubs, by = "gddid") %>%
+#       select(gddid, word, title, year, journal.name, doi)
+#
+#     short_pub$words <- clean_words(short_pub$word)
+#
+#     short_pub$gddid = paste0('<small><a title ="',
+#                              short_pub$gddid, '" href = "',
+#                              short_pub$gddid,'">',
+#                              substr(short_pub$gddid, 1, 2), '...', substr(short_pub$gddid, 20, 24),
+#                              '</a></small>')
+#
+#     output <- data.frame(short_pub)
+#   }
+#
+#   out_table <- DT::datatable(output, escape = FALSE, rownames = FALSE) %>%
+#     DT::formatStyle(columns = 'word',
+#                     `word-wrap` = 'break-word',
+#                     `word-break` = 'break-all',
+#                     `white-space` = 'normal')
+#
+#   return(out_table)
+# }

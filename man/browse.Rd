@@ -7,7 +7,7 @@
 browse(x, corpus = NULL, pubs = NULL, words = NULL)
 }
 \arguments{
-\item{x}{One of, a vector of character \code{gddid}s from GeoDeepDive, or a \code{data.frame} with columns \code{gddid} and \code{words}.}
+\item{x}{A vector of numeric \code{gddid}s from GeoDeepDive, a \code{boolean} vector where \code{length(x) == corpus}, or a \code{data.frame} with columns \code{gddid} and \code{words}.}
 
 \item{corpus}{The full GDD corpus of which \code{x} is expected to be a subset.}
 
@@ -20,9 +20,30 @@ A quick view method for looking at publication data from the GeoDeepDive publica
 }
 \examples{
 \dontrun{
+# Load in sample data:
+
+data(nlp)
+data(publications)
+
 subset <- sample(nrow(nlp), 100)
+
+# Return only the publication information, using gddids as the key:
+
 browse(x = nlp$`_gddid`[subset],
+       pubs = publications)
+
+# Using a numeric or boolean index of sentences:
+
+subset <- sample(nrow(nlp), 100)
+
+browse(x = subset,
        pubs = publications,
-       words = nlp$word[subset])
+       corpus = nlp)
+
+subset <- (1:nrow(nlp)) \%in\% subset
+browse(x = subset,
+       pubs = publications,
+       corpus = nlp)
 }
+
 }
