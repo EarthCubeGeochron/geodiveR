@@ -4,5 +4,17 @@
 \alias{browse.logical}
 \title{Summarize publications}
 \usage{
-\method{browse}{logical}(x, corpus = NULL, pubs = NULL, ...)
+\method{browse}{logical}(x, corpus = NULL, pubs = NULL, words = NULL)
+}
+\arguments{
+\item{x}{A vector of numeric \code{gddid}s from GeoDeepDive, a \code{boolean} vector where \code{length(x) == corpus}, or a \code{data.frame} with columns \code{gddid} and \code{words}.}
+
+\item{corpus}{The full GDD corpus of which \code{x} is expected to be a subset.}
+
+\item{pubs}{The bibliographic information for the GDD dataset.}
+
+\item{words}{A vector of sentences, similar to the GDD corpus \code{words} column.}
+}
+\description{
+A quick view method for looking at publication data from the GeoDeepDive publications.
 }

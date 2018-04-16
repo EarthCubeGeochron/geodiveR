@@ -39,8 +39,13 @@ browse <- function(x, corpus = NULL, pubs = NULL, words = NULL) {
 }
 
 #' @title Summarize publications
+#' @description A quick view method for looking at publication data from the GeoDeepDive publications.
+#' @param x A vector of numeric \code{gddid}s from GeoDeepDive, a \code{boolean} vector where \code{length(x) == corpus}, or a \code{data.frame} with columns \code{gddid} and \code{words}.
+#' @param words A vector of sentences, similar to the GDD corpus \code{words} column.
+#' @param corpus The full GDD corpus of which \code{x} is expected to be a subset.
+#' @param pubs The bibliographic information for the GDD dataset.
 #' @export
-browse.logical <- function(x, corpus = NULL, pubs = NULL, ...) {
+browse.logical <- function(x, corpus = NULL, pubs = NULL, words = NULL) {
 
   assertthat::assert_that(!is.null(pubs),
                           msg = "With a boolean vector you must provide a table of publications.")
@@ -60,8 +65,13 @@ browse.logical <- function(x, corpus = NULL, pubs = NULL, ...) {
 
 
 #' @title Summarize publications
+#' @description A quick view method for looking at publication data from the GeoDeepDive publications.
+#' @param x A vector of numeric \code{gddid}s from GeoDeepDive, a \code{boolean} vector where \code{length(x) == corpus}, or a \code{data.frame} with columns \code{gddid} and \code{words}.
+#' @param words A vector of sentences, similar to the GDD corpus \code{words} column.
+#' @param corpus The full GDD corpus of which \code{x} is expected to be a subset.
+#' @param pubs The bibliographic information for the GDD dataset.
 #' @export
-browse.numeric <- function(x, corpus = NULL, pubs = NULL, ...) {
+browse.numeric <- function(x, corpus = NULL, pubs = NULL, words = NULL) {
   assertthat::assert_that(!is.null(pubs),
                           msg = "With a numeric index you must provide a table of publications.")
 
@@ -107,6 +117,11 @@ browse.numeric <- function(x, corpus = NULL, pubs = NULL, ...) {
 }
 
 #' @title Summarize publications
+#' @description A quick view method for looking at publication data from the GeoDeepDive publications.
+#' @param x A vector of numeric \code{gddid}s from GeoDeepDive, a \code{boolean} vector where \code{length(x) == corpus}, or a \code{data.frame} with columns \code{gddid} and \code{words}.
+#' @param words A vector of sentences, similar to the GDD corpus \code{words} column.
+#' @param corpus The full GDD corpus of which \code{x} is expected to be a subset.
+#' @param pubs The bibliographic information for the GDD dataset.
 #' @export
 browse.character <- function(x, corpus = NULL, pubs = NULL, words = NULL) {
   assertthat::assert_that(!is.null(pubs),
