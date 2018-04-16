@@ -42,13 +42,13 @@ browse <- function(x, corpus = NULL, pubs = NULL, words = NULL) {
 browse.logical <- function(x, corpus = NULL, pubs = NULL, ...) {
 
   assertthat::assert_that(!is.null(pubs),
-                          msg = "With a numeric index you must provide a table of publications.")
+                          msg = "With a boolean vector you must provide a table of publications.")
 
-  assertthat::assert_that(!is.null(corpus),
-                          msg = "With a numeric index you must provide a table of publications.")
+  assertthat::assert_that(!is.null(pubs),
+                          msg = "With a boolean vector you must provide a table of publications.")
 
-  assertthat::assert_that(!max(x) > nrow(corpus),
-                          msg = "With a character vector of gddids you must provide a corpus.")
+  assertthat::assert_that(length(x) == nrow(corpus),
+                          msg = "With a boolean vector the vector and corpus length must be equal.")
 
   assertthat::assert_that(any(c('gddid', '_gddid') %in% colnames(pubs)),
                           msg = "There must be a column either `gddid` or `_gddid` in `x` if `x` is a `data.frame`")
@@ -84,7 +84,7 @@ browse.numeric <- function(x, corpus = NULL, pubs = NULL, ...) {
   short_out <- output %>%
     dplyr::select(gddid, word, title, year, journal.name, doi)
 
-  short_out$words <- clean_words(short_pub$word)
+  short_out$words <- clean_words(short_out$word)
 
   short_out$gddid <- paste0('<small><a title ="',
                             short_out$gddid, '" href = "',
