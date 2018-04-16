@@ -130,11 +130,9 @@ browse.character <- function(x, corpus = NULL, pubs = NULL, words = NULL) {
   assertthat::assert_that(any(c('gddid', '_gddid') %in% colnames(pubs)),
                           msg = "There must be a column either `gddid` or `_gddid` in `x` if `x` is a `data.frame`")
 
-  output <- pubs[pubs$`_gddid` %in% x,]
-
   colnames(pubs)[which(colnames(pubs) == "_gddid")] <- "gddid"
 
-  pubs <- pubs %>% dplyr::filter(gddid %in% x)
+  pubs <- pubs[pubs$gddid %in% x, ]
 
   pubs$doi <- paste0('<a href="http://dx.doi.org/', sapply(pubs$identifier, '[[', 'id'), '">DOI</a>')
 

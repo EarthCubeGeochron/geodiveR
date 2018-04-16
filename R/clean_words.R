@@ -6,6 +6,8 @@
 
 clean_words <- function(x) {
 
+  . <- NULL
+
   ret <- gsub("[(${)(}^)]", "", x) %>%                # Curly brakets
     gsub("(,([\\;\\:\\%]),)","\\2 ", .) %>%
     gsub("(([^\"]),([^\"]))", "\\2 \\3", ., perl = TRUE) %>%
