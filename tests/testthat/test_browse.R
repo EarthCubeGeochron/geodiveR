@@ -1,6 +1,7 @@
 library(testthat)
 
-test_that("Correct browsing:" {
+context("Checking the browsing")
+test_that("Correct browsing:", {
   data(nlp)
   data(publications)
   expect_is(browse((1:nrow(nlp)), corpus = nlp, pubs = publications), "datatables")
