@@ -90,7 +90,7 @@ browse.numeric <- function(x, corpus = NULL, pubs = NULL, words = NULL) {
   output <- corpus[x, ] %>%
     dplyr::left_join(y = pubs, by = 'gddid')
 
-  output$doi <- paste0('<a href="http://dx.doi.org/', sapply(output$identifier, '[[', 'id'), '">DOI</a>')
+  output$doi <- paste0('<a href="https://doi.org/', sapply(output$identifier, '[[', 'id'), '">DOI</a>')
 
   short_out <- output %>%
     dplyr::select('gddid', 'word', 'title', 'year', 'journal.name', 'doi')
@@ -134,7 +134,7 @@ browse.character <- function(x, corpus = NULL, pubs = NULL, words = NULL) {
 
   pubs <- pubs[pubs$gddid %in% x, ]
 
-  pubs$doi <- paste0('<a href="http://dx.doi.org/', sapply(pubs$identifier, '[[', 'id'), '">DOI</a>')
+  pubs$doi <- paste0('<a href="https://doi.org/', sapply(pubs$identifier, '[[', 'id'), '">DOI</a>')
 
   short_pub <- pubs %>%
     dplyr::select('gddid', 'title', 'year', 'journal.name', 'doi')
