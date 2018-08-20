@@ -22,6 +22,8 @@ load_dd(con, bib, sent, bib_name = "publications", sent_name = "sentences",
 Takes a raw SQL file and loads it into a Postgres database.
 }
 \examples{
+library(geodiveR)
+library(RPostgreSQL)
   con <- dbConnect(drv = "PostgreSQL",
                    user = "postgres",
                    password = "postgres",

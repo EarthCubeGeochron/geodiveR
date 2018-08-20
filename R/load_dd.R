@@ -5,7 +5,16 @@
 #' @param sent A set of parsed sentence files from the NLP output.
 #' @param bib_name The name for the bibliography table in the database.
 #' @param sent_name The name for the sentence table in the database.
+#' @importFrom RPostgreSQL dbConnect dbExistsTable dbRemoveTable
+#' @importFrom DBI dbCreateTable
+#' @importFrom readr read_file read_delim
+#' @importFrom purrrlyr by_row
+#' @importFrom dplyr select rename combine bind_rows mutate
+#' @importFrom assertthat see_if
+#' @importFrom jsonlite fromJSON
 #' @examples
+#' library(geodiveR)
+#' library(RPostgreSQL)
 #'   con <- dbConnect(drv = "PostgreSQL",
 #'                    user = "postgres",
 #'                    password = "postgres",
@@ -23,15 +32,14 @@
 #'
 #'   load_dd(con, bib = publications, sent = nlp)
 #'
-#' @import RPostgreSQL
-#' @importFrom readr read_file
-#' @importFrom purrrlyr by_row
 #' @export
 load_dd <- function(con, bib, sent,
                     bib_name = 'publications',
                     sent_name = 'sentences',
                     clean = TRUE) {
 
+  assertthat::see_if("PostgreSQLConnection" %in% class(con),
+                     msg = "You must provide a valid connection to a postgres database using the dbConnect function in RPostgreSQL.")
   assertthat::see_if("character" %in% class(bib),
                      msg = "The bibliography object must be a character string, either a valid JSON string of a file path.")
 
@@ -172,4 +180,5 @@ load_dd <- function(con, bib, sent,
                append = TRUE,
                row.names = FALSE)
 
+  return(con)
 }
