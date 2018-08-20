@@ -2,9 +2,9 @@
 % Please edit documentation in R/gddMatch.R
 \name{gddMatch}
 \alias{gddMatch}
-\title{Build matches}
+\title{Build matches using basic pattern matching.}
 \usage{
-gddMatch(con, table, col, pattern, boolean = TRUE, name)
+gddMatch(con, table, col, pattern, rows = FALSE, name)
 }
 \arguments{
 \item{con}{A database connection to the GDD database.}
@@ -13,11 +13,14 @@ gddMatch(con, table, col, pattern, boolean = TRUE, name)
 
 \item{col}{The table column.}
 
-\item{pattern}{A Postgres-compliant regex pattern. \url{https://www.postgresql.org/docs/9.3/static/functions-matching.html}.}
+\item{pattern}{A Postgres-compliant (and case-sensitive) regex pattern. \url{https://www.postgresql.org/docs/9.3/static/functions-matching.html}.}
 
-\item{boolean}{Do you want a boolean match returned?}
+\item{rows}{Do you want to return the explicit rows (default is FALSE)?}
 
 \item{name}{The name used to identify the query.}
+}
+\description{
+A wrapper for the \code{DBI::dbGetQuery()} that provides support for basic pattern matching.
 }
 \examples{
 library(geodiveR)

@@ -1,0 +1,99 @@
+---
+title: "DeepDive Working"
+author: "Simon Goring"
+date: "August 14, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Setting Up geoDiveR Environment
+
+Using geoDiverR efficiently requires the use of a postgres server, and a local DeepDive database.
+
+### Installing postgreSQL
+
+Postgres can be installed on almost every platform.  Follow the [installation instructions on the official postgres webpage](https://www.postgresql.org/download/) to install postgres for your particular OS.
+
+### Creating a new user
+
+This step is optional.  If you expect others to work collaboratively, or are hosting the project in the cloud, it may be worthwhile creating a new user for your server.
+
+### Creating a new database
+
+Create a database called `deepdive` for the purposes of this exercise.
+
+## Connecting to `deepdive` for the first time
+
+When you connect to DeepDive for the first time you will obtain two files, one is a JSON formatted bibliography file, the other is the Stanford NLP output file.  Presuming you have set up a new Postgres Database (here as a local server), we can load in the database and connect:
+
+```{r, echo = TRUE, results='hide'}
+
+library(geodiveR)
+library(RPostgreSQL)
+
+# Connect to a database:
+con <- dbConnect(drv = "PostgreSQL", 
+                 user = "postgres", 
+                 password = "postgres",
+                 host = "localhost",
+                 port = "5432",
+                 dbname = "deepdive")
+
+# Replace these with text strings pointing to file locations, or JSON files.
+data("nlp")
+data("publications")
+
+con <- load_dd(con, bib = publications, sent = nlp, clean = TRUE)
+
+```
+
+After the database is loaded (or connected), we can look to make sure that things have been loaded as we might expect:
+
+```{r}
+summaryGdd(con)
+```
+
+Looking over the database structure you can see that `geodiveR` creates four different tables: `publications` contains the list of unique bibliographic information for each paper within the GDD resource; `authors` contains the names of all the authors of each publication (and is a one to many table, there can be many authors for any one paper); `links` includes all the link types for a paper, for example DOIs or URLs (one to many); `sentences` provides the full NLP output for the record.
+
+These tables become the basis for our future analysis.
+
+## Viewing Data
+
+Our test set contains `r (summaryGdd(con) %>% dplyr::filter(table == "publications"))$rows[1]` publications and `r (summaryGdd(con) %>% dplyr::filter(table == "sentences"))$rows[1]` total sentences.  This can be an overwhelming amount of data, particularly with the complex outputs from the NLP data.
+
+Much of the GDD workflow relies on feature detection.  To begin to understand the data we may wish to view small subsets.  First it might be useful to take a look at some of the tables, or fields to see what the database actually looks like internally:
+
+```{r}
+skim(con, table = 'authors')
+```
+
+The `skim()` function returns a random subset of rows within a table, you can apply it to any table in the database, and, in the case where columns might be very long, to single columns:
+
+```{r}
+skim(con, table = 'sentences', column = 'words', n = 5)
+```
+
+## Applying Queries
+
+We can then begin to apply queries to the database, and, possibly chain them.  For example, we are interested in knowing which papers have the term "pollen" in them as a stand-alone sentence.  We also want to find papers that discuss pollen in the context of summer months:
+
+```{r}
+pollen <- gddMatch(con, 
+                   table = "sentences", 
+                   col = "words", 
+                   pattern = ",pollen,", 
+                   name = "pollenQuery")
+
+summer <- gddMatch(con, 
+                   table = "sentences", 
+                   col = "words", 
+                   pattern = "((July)|(June)|(August)|(summer))", 
+                   name = "summerQuery")
+```
+
+This gives us two subsets of data, managed as `list()` objects in R, but also with a class `gddMatch()`.  The object contains the original query (as `pollen$query`) and a vector of `TRUE`/`FALSE` values indicating whether a particular sentence matched the text pattern.
+
+
