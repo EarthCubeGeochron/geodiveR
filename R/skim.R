@@ -24,6 +24,22 @@
 #'
 #' skim(con, 'sentences')
 #'
+#' # Using the results of a gddMatch:
+#' coords <- gddMatch(con,
+#'                    table = 'sentences',
+#'                    col = 'words',
+#'                    pattern = '[\\{,][-]?[1]?[0-9]{1,2}\\.[0-9]{1,}[,]?[NESWnesw],',
+#'                    name = "decdeg",
+#'                    rows = TRUE)
+#'
+#' DT::datatable(skim(coords, setseed=0.5, clean = 'replace'), )
+#'
+#' dates <- gddMatch(con,
+#'                    table = 'sentences',
+#'                    col = 'words',
+#'                    pattern = '(\\d+(?:[.]\\d+)*),((?:-{1,2})|(?:to)),(\\d+(?:[.]\\d+)*),([a-zA-Z]+,BP),',
+#'                    name = "decdeg",
+#'                    rows = TRUE)
 #' @export
 
 skim <- function(x,
@@ -59,13 +75,13 @@ skim.data.frame <- function(x, table = NULL,
     assertthat::see_if(column %in% colnames(x), msg = "Named column is not in the provided data.frame.")
     output <- x[ , which(colnames(x) == column)]
     if (clean == TRUE) {
-      output <- clean_words(output)
+      output <- cleanWords(output)
     }
     return(output)
   }
 
   if (clean == TRUE & 'words' %in% colnames(x)) {
-    x$words <- clean_words(x$words)
+    x$words <- cleanWords(x$words)
   }
 }
 
@@ -103,13 +119,57 @@ skim.PostgreSQLConnection <- function(x, table,
   if ('words' %in% colnames(query_result)) {
     if (clean == 'replace') {
       query_result <- query_result %>%
-        dplyr::mutate(words = clean_words(words))
+        dplyr::mutate(words = cleanWords(words))
     }
     if (clean == 'keep') {
       query_result <- query_result %>%
-        dplyr::mutate(clean_words = clean_words(words))
+        dplyr::mutate(cleanWords = cleanWords(words))
     }
   }
 
   return(query_result)
+}
+
+#' @export
+skim.gddMatch <- function(x, table,
+                           column = NULL, n = 10,
+                           clean = TRUE, randomize = TRUE,
+                           setseed = NULL) {
+  if (!is.null(x$rows)) {
+    if(!is.null(column)) {
+      assertthat::see_if(column %in% colnames(x$rows),
+                         msg = "Named column is not in the table.")
+      cols <- column
+    } else {
+      cols <- colnames(x$rows)
+    }
+
+    if(!is.null(setseed)) {
+      set.seed(setseed)
+    }
+
+    if(randomize == TRUE) {
+      rn <- sample(nrow(x$rows), n)
+    } else {
+      rn <- 1:n
+    }
+
+    query_result <- x$rows[rn, ] %>% select(cols)
+
+    if ('words' %in% cols) {
+      if (clean == 'replace') {
+        query_result <- query_result %>%
+          dplyr::mutate(words = cleanWords(words))
+      }
+      if (clean == 'keep') {
+        query_result <- query_result %>%
+          dplyr::mutate(cleanWords = cleanWords(words))
+      }
+    }
+
+    print(query_result)
+
+  } else {
+    message("Skim requires at least one gddMatch element to have stored rows.")
+  }
 }

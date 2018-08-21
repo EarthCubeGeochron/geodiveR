@@ -19,31 +19,27 @@ browse(x, corpus = NULL, pubs = NULL, words = NULL)
 A quick view method for looking at publication data from the GeoDeepDive publications.
 }
 \examples{
-\dontrun{
-# Load in sample data:
-
-data(nlp)
-data(publications)
-
-subset <- sample(nrow(nlp), 100)
+library(geodiveR)
+library(RPostgreSQL)
+  con <- dbConnect(drv = "PostgreSQL",
+                   user = "postgres",
+                   password = "postgres",
+                   host = "localhost",
+                   port = "5432",
+                   dbname = "deepdive")
 
 # Return only the publication information, using gddids as the key:
 
-browse(x = nlp$`_gddid`[subset],
-       pubs = publications)
-
 # Using a numeric or boolean index of sentences:
 
-subset <- sample(nrow(nlp), 100)
+ july_sent <- gddMatch(con,
+                       table = 'sentences',
+                       col = 'words',
+                       pattern = '((July)|(August))',
+                       boolean = TRUE,
+                       name = 'SummerQuery')
 
-browse(x = subset,
-       pubs = publications,
-       corpus = nlp)
-
-subset <- (1:nrow(nlp)) \%in\% subset
-browse(x = subset,
-       pubs = publications,
-       corpus = nlp)
-}
+browse(july_sent,
+       pubs = TRUE)
 
 }

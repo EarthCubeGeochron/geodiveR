@@ -106,7 +106,7 @@ Our test set contains `r (summaryGdd(con) %>% dplyr::filter(table == "publicatio
 Much of the GDD workflow relies on feature detection.  To begin to understand the data we may wish to view small subsets.  First it might be useful to take a look at some of the tables, or fields to see what the database actually looks like internally:
 
 ```{r}
-skim(con, table = 'authors')
+skim(con, table = 'authors', n =14)
 ```
 
 The `skim()` function returns a random subset of rows within a table. You can apply it to any table in the database, or a `data.frame`.  In the case where columns might be very long (for example the `sentences` column), the `skim()` function can be applied to single columns:
@@ -115,7 +115,7 @@ The `skim()` function returns a random subset of rows within a table. You can ap
 skim(con, table = 'sentences', column = 'words', n = 5)
 ```
 
-The `setseed` flag is used if there is a need to establish entirely reproducible workflows, where results must remain static from one iteration to another.
+The `setseed` flag is used if there is a need to establish entirely reproducible workflows, where results must remain static from one iteration to another.  While R supports a seed range of +/-2*10^9, Postgres only supports a seed range of -1 -- 1.
 
 ## Applying Queries
 
@@ -134,13 +134,28 @@ summer <- gddMatch(con,
                    pattern = "((July)|(June)|(August)|(summer))",
                    name = "summerQuery",
                    rows = TRUE)
+
+coords <- gddMatch(con,
+                   table = 'sentences',
+                   col = 'words',
+                   pattern = '[\\{,][-]?[1]?[0-9]{1,2}\\.[0-9]{1,}[,]?[NESWnesw],',
+                   name = "decdeg",
+                   rows = TRUE)
+
+dates <- gddMatch(con,
+                  table = 'sentences',
+                  col = 'words',
+                  pattern = '(\\d+(?:[.]\\d+)*),((?:-{1,2})|(?:to)),(\\d+(?:[.]\\d+)*),([a-zA-Z]+,BP),',
+                  name = "dates",
+                  rows = TRUE)
+
 ```
 
-This gives us two subsets of data, managed as `list()` objects in R, but also with a class `gddMatch()`. The object contains the original query (as `pollen$query`) and a vector of `TRUE`/`FALSE` values indicating whether a particular sentence matched the text pattern.  If you want the function to return the explicit matches then you can use the `rows` flag.
+This gives us subsets of data, managed as `list()` objects in R, but also with a class `gddMatch()`. The object contains the original query (as `pollen$query`) and a vector of `TRUE`/`FALSE` values indicating whether a particular sentence matched the text pattern.  If you want the function to return the explicit matches then you can use the `rows` flag.
 
 The package should combine results as well.  Currently there is an `and()` function implemented:
 
 ```{r}
-combines <- and(pollen, summer)
+combines <- and(coords, dates)
 ```
 

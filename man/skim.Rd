@@ -39,4 +39,20 @@ con <- dbConnect(drv = "PostgreSQL",
 
 skim(con, 'sentences')
 
+# Using the results of a gddMatch:
+coords <- gddMatch(con,
+                   table = 'sentences',
+                   col = 'words',
+                   pattern = '[\\\\{,][-]?[1]?[0-9]{1,2}\\\\.[0-9]{1,}[,]?[NESWnesw],',
+                   name = "decdeg",
+                   rows = TRUE)
+
+DT::datatable(skim(coords, setseed=0.5, clean = 'replace'), )
+
+dates <- gddMatch(con,
+                   table = 'sentences',
+                   col = 'words',
+                   pattern = '(\\\\d+(?:[.]\\\\d+)*),((?:-{1,2})|(?:to)),(\\\\d+(?:[.]\\\\d+)*),([a-zA-Z]+,BP),',
+                   name = "decdeg",
+                   rows = TRUE)
 }
