@@ -6,6 +6,7 @@
 #' @param n The number of rows to return
 #' @param clean Should \code{word} columns (if present) be cleaned using \code{clean_words} ('skip', replace', 'keep')?
 #' @param randomize Should the rows be a random sample from the larger dataset?
+#' @param setseed A value between \code{-1.0} and \code{1.0} to set the postgres random seed.
 #' @importFrom assertthat see_if
 #' @importFrom dplyr mutate
 #' @importFrom DBI dbListTables
@@ -25,15 +26,29 @@
 #'
 #' @export
 
-skim <- function(x, table = NULL, column = NULL, n = 10, clean = TRUE, randomize = TRUE) {
+skim <- function(x,
+  table = NULL,
+  column = NULL,
+  n = 10,
+  clean = TRUE,
+  randomize = TRUE,
+  setseed = NULL) {
   UseMethod('skim')
 }
 
 #' @export
-skim.data.frame <- function(x, table = NULL, column = NULL, n = 10, clean = TRUE, randomize = TRUE) {
+skim.data.frame <- function(x, table = NULL,
+  column = NULL, n = 10,
+  clean = TRUE, randomize = TRUE,
+  setseed = NULL) {
 
   if (randomize == TRUE) {
-    rows <- sample(nrow(x), n)
+    if (!is.null(setseed)) {
+      set.seed(setseed)
+      rows <- sample(nrow(x), n)
+    } else {
+      rows <- sample(nrow(x), n)
+    }
   } else {
     rows <- 1:n
   }
@@ -55,7 +70,10 @@ skim.data.frame <- function(x, table = NULL, column = NULL, n = 10, clean = TRUE
 }
 
 #' @export
-skim.PostgreSQLConnection <- function(x, table, column = NULL, n = 10, clean = TRUE, randomize = TRUE) {
+skim.PostgreSQLConnection <- function(x, table,
+  column = NULL, n = 10,
+  clean = TRUE, randomize = TRUE,
+  setseed = NULL) {
 
   assertthat::see_if(!is.null(table),
                      msg = "If `x` is a postgres connection you must supply a table name.")
@@ -64,15 +82,20 @@ skim.PostgreSQLConnection <- function(x, table, column = NULL, n = 10, clean = T
                      msg = paste0("Currently ", table, " is not a table in the GDD database."))
 
   if (randomize == TRUE) {
+    if (!is.null(setseed)) {
+      seed <- paste0("SELECT setseed(", setseed, "); ")
+    } else {
+      seed <- ""
+    }
     rand <- " ORDER BY RANDOM() "
   } else {
     rand <- " "
   }
 
   if (is.null(column)) {
-    query <- paste0("SELECT * FROM ", table, rand, " LIMIT ", n)
+    query <- paste0(seed, "SELECT * FROM ", table, rand, " LIMIT ", n)
   } else {
-    query <- paste0("SELECT ", column, " FROM ", table, rand, " LIMIT ", n)
+    query <- paste0(seed, "SELECT ", column, " FROM ", table, rand, " LIMIT ", n)
   }
 
   query_result <- DBI::dbGetQuery(x, query)

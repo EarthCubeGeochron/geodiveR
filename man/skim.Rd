@@ -5,7 +5,7 @@
 \title{Skim a GDD table}
 \usage{
 skim(x, table = NULL, column = NULL, n = 10, clean = TRUE,
-  randomize = TRUE)
+  randomize = TRUE, setseed = NULL)
 }
 \arguments{
 \item{x}{A database connection or a query result.}
@@ -19,6 +19,8 @@ skim(x, table = NULL, column = NULL, n = 10, clean = TRUE,
 \item{clean}{Should \code{word} columns (if present) be cleaned using \code{clean_words} ('skip', replace', 'keep')?}
 
 \item{randomize}{Should the rows be a random sample from the larger dataset?}
+
+\item{setseed}{A value between \code{-1.0} and \code{1.0} to set the postgres random seed.}
 }
 \description{
 Examine a random set of rows from a table, or a table subset
