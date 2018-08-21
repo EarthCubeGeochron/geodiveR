@@ -14,9 +14,7 @@ output:
     latex_engine: xelatex
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 
 ## Setting Up the `geoDiveR` Environment
 
@@ -68,11 +66,21 @@ When you connect to DeepDive for the first time you will obtain two files, one i
 
 The R package `geodiveR` includes a test dataset and associated bibliographic information for 150 papers that can be loaded using `data()`.  These objects are similar to the files you would obtain from GeoDeepDive.
 
-```{r, echo = TRUE, results='hide'}
 
+```r
 library(geodiveR)
 library(RPostgreSQL)
+```
 
+```
+## Loading required package: methods
+```
+
+```
+## Loading required package: DBI
+```
+
+```r
 # Connect to a database:
 con <- dbConnect(drv = "PostgreSQL",
                  user = "postgres",
@@ -86,13 +94,56 @@ data("nlp")
 data("publications")
 
 con <- load_dd(con, bib = publications, sent = nlp, clean = TRUE)
+```
 
+```
+## Creating the `publications` table.
+```
+
+```
+## Creating the `authors` table.
+```
+
+```
+## Creating the `links` table.
+```
+
+```
+## Creating the `sentences` table.
 ```
 
 After the database is loaded (or connected), we can look to make sure that things have been loaded as we might expect:
 
-```{r}
+
+```r
 summaryGdd(con)
+```
+
+```
+##           table          fields  rows
+## 1  publications       publisher   150
+## 2  publications           title   150
+## 3  publications            year   150
+## 4  publications          number   150
+## 5  publications          volume   150
+## 6  publications           gddid   150
+## 7  publications            type   150
+## 8  publications           pages   150
+## 9  publications    journal.name   150
+## 10      authors           gddid   763
+## 11      authors            name   763
+## 12        links           gddid   300
+## 13        links            type   300
+## 14        links              id   300
+## 15    sentences           gddid 87181
+## 16    sentences        sentence 87181
+## 17    sentences      word_index 87181
+## 18    sentences           words 87181
+## 19    sentences parts_of_speech 87181
+## 20    sentences    named_entity 87181
+## 21    sentences          lemmas 87181
+## 22    sentences       dep_paths 87181
+## 23    sentences     dep_parents 87181
 ```
 
 Looking over the database structure you can see that `geodiveR` creates four different tables: `publications` contains the list of unique bibliographic information for each paper within the GDD resource; `authors` contains the names of all the authors of each publication (and is a one to many table, there can be many authors for any one paper); `links` includes all the link types for a paper, for example DOIs or URLs (one to many); `sentences` provides the full NLP output for the record.
@@ -101,18 +152,43 @@ These tables become the basis for our future analysis.
 
 ## Viewing Data
 
-Our test set contains `r (summaryGdd(con) %>% dplyr::filter(table == "publications"))$rows[1]` publications and `r (summaryGdd(con) %>% dplyr::filter(table == "sentences"))$rows[1]` total sentences.  This can be an overwhelming amount of data, particularly with the complex outputs from the NLP data.
+Our test set contains 150 publications and 8.7181\times 10^{4} total sentences.  This can be an overwhelming amount of data, particularly with the complex outputs from the NLP data.
 
 Much of the GDD workflow relies on feature detection.  To begin to understand the data we may wish to view small subsets.  First it might be useful to take a look at some of the tables, or fields to see what the database actually looks like internally:
 
-```{r}
+
+```r
 skim(con, table = 'authors')
+```
+
+```
+##                       gddid                     name
+## 1  5804c1f8cf58f15c39fc6017 van Hardenbroek, Maarten
+## 2  583a3aa3cf58f15fc57a4eb8        Lotter, Elisabeth
+## 3  5792688ecf58f12668028eef     Genson, Gwenaelle S.
+## 4  54b43277e138239d86852045     Henderson, Gideon M.
+## 5  58bcd0c6cf58f152cfe8fa29      Valero-Garcés, B.L.
+## 6  55ccab4ecf58f190b49048ad       Keddadouche, Karim
+## 7  5801ff6acf58f11d2d408685        Aghamohammadi, A.
+## 8  5749c086cf58f1aa78e6f4f5          GARLAN, Thierry
+## 9  58bcd7d4cf58f155c047f508           Knutz, Paul C.
+## 10 54cc6b86e138236bcc92a002             Asami, Ryuji
 ```
 
 The `skim()` function returns a random subset of rows within a table. You can apply it to any table in the database, or a `data.frame`.  In the case where columns might be very long (for example the `sentences` column), the `skim()` function can be applied to single columns:
 
-```{r}
+
+```r
 skim(con, table = 'sentences', column = 'words', n = 5)
+```
+
+```
+##                                                                                                                                                                                                                                                                                                       words
+## 1                                                                                                                                                                                                                                                                                       {110,",",344e360,.}
+## 2                                                                                                                                                                            {26,-LRB-,8,-RRB-,839,--,853,-LRB-,2011,-RRB-,LATE,HOLOCENE,ENVIRONMENTS,OF,CORONATION,GULF,853,Smith,JN,",",Walton,A.,1980,.}
+## 3                                                                                                                                                                                                                                                         {Foucault,",",A.,",",Stanley,",",D.J.,",",1989,.}
+## 4 {That,the,moraine,system,identiﬁed,by,McCabe,et,al.,-LRB-,1998,-RRB-,represented,a,readvance,rather,than,a,recessional,phase,of,the,ice,sheet,",",however,",",is,based,on,clearly,expressed,geomorphic,evidence,of,cross-cutting,relations,of,ice-ﬂow,indicators,related,to,the,younger,moraine,system,.}
+## 5                                                                                                                                                                                                                                     {Present,dynamics,and,future,prognosis,of,a,slowly,surging,glacier,.}
 ```
 
 The `setseed` flag is used if there is a need to establish entirely reproducible workflows, where results must remain static from one iteration to another.
@@ -121,7 +197,8 @@ The `setseed` flag is used if there is a need to establish entirely reproducible
 
 With the data placed into the database it is possible to apply queries to the database, and, possibly chain them.  For example, we are interested in knowing which papers have the term "pollen" in them as a stand-alone sentence.  We also want to find papers that discuss pollen in the context of summer months:
 
-```{r}
+
+```r
 pollen <- gddMatch(con,
                    table = "sentences",
                    col = "words",
@@ -140,7 +217,8 @@ This gives us two subsets of data, managed as `list()` objects in R, but also wi
 
 The package should combine results as well.  Currently there is an `and()` function implemented:
 
-```{r}
+
+```r
 combines <- and(pollen, summer)
 ```
 
