@@ -83,6 +83,8 @@ skim.data.frame <- function(x, table = NULL,
   if (clean == TRUE & 'words' %in% colnames(x)) {
     x$words <- cleanWords(x$words)
   }
+
+  return(x)
 }
 
 #' @export
@@ -167,7 +169,7 @@ skim.gddMatch <- function(x, table,
       }
     }
 
-    print(query_result)
+    return(query_result)
 
   } else {
     message("Skim requires at least one gddMatch element to have stored rows.")

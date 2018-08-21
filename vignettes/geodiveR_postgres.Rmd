@@ -68,7 +68,7 @@ When you connect to DeepDive for the first time you will obtain two files, one i
 
 The R package `geodiveR` includes a test dataset and associated bibliographic information for 150 papers that can be loaded using `data()`.  These objects are similar to the files you would obtain from GeoDeepDive.
 
-```{r, echo = TRUE, results='hide'}
+```{r, loaddb, echo = TRUE, results='as-is', messages = TRUE}
 
 library(geodiveR)
 library(RPostgreSQL)
@@ -91,7 +91,7 @@ con <- load_dd(con, bib = publications, sent = nlp, clean = TRUE)
 
 After the database is loaded (or connected), we can look to make sure that things have been loaded as we might expect:
 
-```{r}
+```{r, giveSummary}
 summaryGdd(con)
 ```
 
@@ -105,13 +105,13 @@ Our test set contains `r (summaryGdd(con) %>% dplyr::filter(table == "publicatio
 
 Much of the GDD workflow relies on feature detection.  To begin to understand the data we may wish to view small subsets.  First it might be useful to take a look at some of the tables, or fields to see what the database actually looks like internally:
 
-```{r}
+```{r firstSkim}
 skim(con, table = 'authors', n =14)
 ```
 
 The `skim()` function returns a random subset of rows within a table. You can apply it to any table in the database, or a `data.frame`.  In the case where columns might be very long (for example the `sentences` column), the `skim()` function can be applied to single columns:
 
-```{r}
+```{r smallerSkim}
 skim(con, table = 'sentences', column = 'words', n = 5)
 ```
 
@@ -153,9 +153,19 @@ dates <- gddMatch(con,
 
 This gives us subsets of data, managed as `list()` objects in R, but also with a class `gddMatch()`. The object contains the original query (as `pollen$query`) and a vector of `TRUE`/`FALSE` values indicating whether a particular sentence matched the text pattern.  If you want the function to return the explicit matches then you can use the `rows` flag.
 
-The package should combine results as well.  Currently there is an `and()` function implemented:
+To examine the data, we can again apply the `skim()` function:
 
-```{r}
+```{r dateSkim, results='as-is', message=FALSE, warning=FALSE}
+skim(dates, n=10, column = 'words', clean='replace', setseed=-0.5) %>% 
+  DT::datatable()
+```
+
+The package should combine results as well.  Currently there is an `and()` function implemented, but right now it simply binds the results:
+
+```{r andCombine}
 combines <- and(coords, dates)
 ```
 
+And so we can now put these together to start looking at the objects.  We might think of operating row-wise (*"I want an sentence with both dates and coordinates"*), or publication wise (*"I want a paper that includes both dates and coordinates"*).
+
+This is work that needs to be done.  We also need to think about how this would then be scaled.

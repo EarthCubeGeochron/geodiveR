@@ -18,13 +18,14 @@ and.gddMatch <- function(x, ..., rows = FALSE) {
   assertthat::see_if(all(obj_classes),
                      msg = "All `and` elements must be of class `gddMatch`")
 
-  boolean <- data.frame(x$boolean,
-                        sapply(gdd_objects, function(x)x$boolean))
-
   query <- c(x$query,
              sapply(gdd_objects, function(x) x$query))
 
-  names(query) <- colnames(boolean)
+  names(query) <- c(names(x$boolean),
+                    sapply(gdd_objects, function(x) names(x$boolean)))
+
+  boolean <- data.frame(x$boolean,
+                        sapply(gdd_objects, function(x) x$boolean))
 
   if (class(x$rows) == 'NULL') {
     rows <- list(NULL)
@@ -34,17 +35,22 @@ and.gddMatch <- function(x, ..., rows = FALSE) {
 
     names(rows) <- colnames(boolean)
   } else {
+    if('data.frame' %in% class(x$rows)) {
+      x$rows <- list(x$rows)
+    }
+
     for (i in 1:length(gdd_objects)) {
       x$rows[[length(x$rows) + 1]] <- gdd_objects[[i]]$rows
     }
+
     rows <- x$rows
   }
 
   output <- list(query = query,
               rows = rows,
               boolean = boolean)
+
   class(output) <- c("gddMatch", "list")
 
   return(output)
-
 }
