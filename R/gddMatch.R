@@ -27,7 +27,7 @@
 
 gddMatch <- function(con, table, col, pattern, rows = FALSE, name) {
 
-  sql_bool <- paste0("SELECT ", col, " ~ ?pattern FROM ", table, " AS ", name)
+  sql_bool <- paste0("SELECT ", col, " ~ ?pattern AS ", name, " FROM ", table, " AS ", name)
   bool_query <- DBI::sqlInterpolate(con, sql_bool, pattern = pattern)
   bool_result <-  DBI::dbGetQuery(con, bool_query)
 
