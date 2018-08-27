@@ -58,6 +58,13 @@ skim.data.frame <- function(x, table = NULL,
   clean = TRUE, randomize = TRUE,
   setseed = NULL) {
 
+  if(!is.null(setseed)) {
+    assertthat::seeif(findinterval(setseed, -1:1,
+                                   leftmost.open = TRUE,
+                                   rightmost.closed = TRUE) == 1,
+                    msg = "The random seed must be between -1 and 1.")
+  }
+
   if (randomize == TRUE) {
     if (!is.null(setseed)) {
       set.seed(setseed)

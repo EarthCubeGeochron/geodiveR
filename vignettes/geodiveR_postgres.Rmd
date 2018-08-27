@@ -122,18 +122,6 @@ The `setseed` flag is used if there is a need to establish entirely reproducible
 With the data placed into the database it is possible to apply queries to the database, and, possibly chain them.  For example, we are interested in knowing which papers have the term "pollen" in them as a stand-alone sentence.  We also want to find papers that discuss pollen in the context of summer months:
 
 ```{r}
-pollen <- gddMatch(con,
-                   table = "sentences",
-                   col = "words",
-                   pattern = ",pollen,",
-                   name = "pollenQuery")
-
-summer <- gddMatch(con,
-                   table = "sentences",
-                   col = "words",
-                   pattern = "((July)|(June)|(August)|(summer))",
-                   name = "summerQuery",
-                   rows = TRUE)
 
 coords <- gddMatch(con,
                    table = 'sentences',
@@ -151,7 +139,21 @@ dates <- gddMatch(con,
 
 ```
 
-This gives us subsets of data, managed as `list()` objects in R, but also with a class `gddMatch()`. The object contains the original query (as `pollen$query`) and a vector of `TRUE`/`FALSE` values indicating whether a particular sentence matched the text pattern.  If you want the function to return the explicit matches then you can use the `rows` flag.
+`gddMatch()` returns subsets of data, managed as `gddMatch` objects that are modified `list()` objects. For example, `dates` contains the original query (as `dates$query`) and a vector of `TRUE`/`FALSE` values (`dates$boolean`) indicating whether a particular sentence matched the text pattern.  
+
+It is possible to apply matches at either the sentence level or at the paper level.  For example, if data processing is specific to a certain subset of the literature, it may be worth applying a test at the paper level.  For example, we wish to apply our age matching only to papers that include the word `"pollen"`:
+
+```{r}
+pollen <- gddMatch(con,
+                   table = "sentences",
+                   col = "words",
+                   pattern = ",pollen,",
+                   name = "pollenQuery",
+                   paper = TRUE)
+
+```
+
+If you want the function to return the explicit matches then you can use the `rows` flag.
 
 To examine the data, we can again apply the `skim()` function:
 

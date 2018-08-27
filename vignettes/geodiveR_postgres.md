@@ -158,21 +158,25 @@ Much of the GDD workflow relies on feature detection.  To begin to understand th
 
 
 ```r
-skim(con, table = 'authors')
+skim(con, table = 'authors', n =14)
 ```
 
 ```
-##                       gddid                     name
-## 1  5804c1f8cf58f15c39fc6017 van Hardenbroek, Maarten
-## 2  583a3aa3cf58f15fc57a4eb8        Lotter, Elisabeth
-## 3  5792688ecf58f12668028eef     Genson, Gwenaelle S.
-## 4  54b43277e138239d86852045     Henderson, Gideon M.
-## 5  58bcd0c6cf58f152cfe8fa29      Valero-Garcés, B.L.
-## 6  55ccab4ecf58f190b49048ad       Keddadouche, Karim
-## 7  5801ff6acf58f11d2d408685        Aghamohammadi, A.
-## 8  5749c086cf58f1aa78e6f4f5          GARLAN, Thierry
-## 9  58bcd7d4cf58f155c047f508           Knutz, Paul C.
-## 10 54cc6b86e138236bcc92a002             Asami, Ryuji
+##                       gddid               name
+## 1  575db265cf58f10504637045      Scourse, J.D.
+## 2  55052064e1382326932d8bce  Black, Jessica L.
+## 3  598a50f3cf58f15f21a0a5e6     Frank, Norbert
+## 4  54b4324be138239d8684a636 Siegert, Martin J.
+## 5  55075de2e1382326932d9538       Böse, Margot
+## 6  5506bbd2e1382326932d928b    März, Christian
+## 7  57f58927cf58f17fab9a5db6 Busfield, Marie E.
+## 8  59021c9bcf58f11131bae620     Martin, Céline
+## 9  54e3e5bee138237cc914fab9      Allègre, C.J.
+## 10 57e29719cf58f113718f010f      Forbriger, T.
+## 11 55075de2e1382326932d9538   Lee, Jonathan R.
+## 12 583a3aa3cf58f15fc57a4eb8  Lotter, Elisabeth
+## 13 54cd7d0fe138236bcc92a483        Cortijo, E.
+## 14 58bb9b90cf58f193073e162f   Boichard, Robert
 ```
 
 The `skim()` function returns a random subset of rows within a table. You can apply it to any table in the database, or a `data.frame`.  In the case where columns might be very long (for example the `sentences` column), the `skim()` function can be applied to single columns:
@@ -183,15 +187,15 @@ skim(con, table = 'sentences', column = 'words', n = 5)
 ```
 
 ```
-##                                                                                                                                                                                                                                                                                                       words
-## 1                                                                                                                                                                                                                                                                                       {110,",",344e360,.}
-## 2                                                                                                                                                                            {26,-LRB-,8,-RRB-,839,--,853,-LRB-,2011,-RRB-,LATE,HOLOCENE,ENVIRONMENTS,OF,CORONATION,GULF,853,Smith,JN,",",Walton,A.,1980,.}
-## 3                                                                                                                                                                                                                                                         {Foucault,",",A.,",",Stanley,",",D.J.,",",1989,.}
-## 4 {That,the,moraine,system,identiﬁed,by,McCabe,et,al.,-LRB-,1998,-RRB-,represented,a,readvance,rather,than,a,recessional,phase,of,the,ice,sheet,",",however,",",is,based,on,clearly,expressed,geomorphic,evidence,of,cross-cutting,relations,of,ice-ﬂow,indicators,related,to,the,younger,moraine,system,.}
-## 5                                                                                                                                                                                                                                     {Present,dynamics,and,future,prognosis,of,a,slowly,surging,glacier,.}
+##                                                                                               words
+## 1                                              {-LRB-,maijbePerm,-RRB-,-,E,skridge,th,Moran,-,fm,.}
+## 2                                                                                       {Geophys,.}
+## 3                                              {Copyright,2008,by,the,American,Geophysical,Union,.}
+## 4 {Grey,:,low,back-scatter,reﬂectivity,patches,within,the,sedimentary,basins,and,Puysegur,Trench,.}
+## 5                                                        {Journal,of,Petrology,21,",",107,--,140,.}
 ```
 
-The `setseed` flag is used if there is a need to establish entirely reproducible workflows, where results must remain static from one iteration to another.
+The `setseed` flag is used if there is a need to establish entirely reproducible workflows, where results must remain static from one iteration to another.  While R supports a seed range of +/-2*10^9, Postgres only supports a seed range of -1 -- 1.
 
 ## Applying Queries
 
@@ -211,14 +215,42 @@ summer <- gddMatch(con,
                    pattern = "((July)|(June)|(August)|(summer))",
                    name = "summerQuery",
                    rows = TRUE)
+
+coords <- gddMatch(con,
+                   table = 'sentences',
+                   col = 'words',
+                   pattern = '[\\{,][-]?[1]?[0-9]{1,2}\\.[0-9]{1,}[,]?[NESWnesw],',
+                   name = "decdeg",
+                   rows = TRUE)
+
+dates <- gddMatch(con,
+                  table = 'sentences',
+                  col = 'words',
+                  pattern = '(\\d+(?:[.]\\d+)*),((?:-{1,2})|(?:to)),(\\d+(?:[.]\\d+)*),([a-zA-Z]+,BP),',
+                  name = "dates",
+                  rows = TRUE)
 ```
 
-This gives us two subsets of data, managed as `list()` objects in R, but also with a class `gddMatch()`. The object contains the original query (as `pollen$query`) and a vector of `TRUE`/`FALSE` values indicating whether a particular sentence matched the text pattern.  If you want the function to return the explicit matches then you can use the `rows` flag.
+This gives us subsets of data, managed as `list()` objects in R, but also with a class `gddMatch()`. The object contains the original query (as `pollen$query`) and a vector of `TRUE`/`FALSE` values indicating whether a particular sentence matched the text pattern.  If you want the function to return the explicit matches then you can use the `rows` flag.
 
-The package should combine results as well.  Currently there is an `and()` function implemented:
+To examine the data, we can again apply the `skim()` function:
 
 
 ```r
-combines <- and(pollen, summer)
+skim(dates, n=10, column = 'words', clean='replace', setseed=-0.5) %>% 
+  DT::datatable()
 ```
 
+<!--html_preserve--><div id="htmlwidget-0f342daf62c57fb7fd61" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-0f342daf62c57fb7fd61">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10"],["The Holocene thermal optimum is represented by an altitudinal tropical forest at 6.1 -- 5.9 ka BP and 6.9 ka BP and only the latter was accompanied by wet conditions, indicating decoupling of thermal and precipitation mechanism in the middle Holocene.","During deposition of unit C,(ca. 14.5 -- 13 ka BP), there was limited inﬂow of Atlantic water.","• Unit C,was deposited in the Norwegian Channel west of Lista ca. 14.5 -- 13 ka BP.","Our data document that the oceanic Polar Front was persistently situated at 42 °,N at least for 3,ka BP, during the HS1 (between 15 to 18 ka BP).","Ice caps on Devon, Meighen, and Ellesmere islands (Fig. 1a) show colder conditions ca. 400 -- 100 a,BP, when sea-ice ice shelves may have also reached their Holocene Copyright ß,2011 John Wiley &amp;,Sons, Ltd..","During 10.5 -- 9.0 kyr BP and 7,-- 5,kyr BP, alkenone-SSTs were relatively warm at all sites for the former period, and at sites 5, 6, and 9,for the latter period, which corresponds to the HTM.","Marine04 Marine radiocarbon age calibration, 26 -- 0,ka BP.","For a,1/4 0:9, this advance begins anywhere from 7.4 to 4.2 ka BP, while for a,1/4 0:8 it does not begin before 4.9 ka BP.","eiliv.larsen@ngu.no A,large-scale deglaciation in central southern Norway during Isotopic Stage 3,(45 -- 30 kyr BP): evidence based on geomorphology, 14C and OSL dates Ø,.","Following the last interglacial, there are some evidence of proglacial conditions about 100 -- 90 ka BP either in response to a,shelf centred glaciation in the Barents -,/ Kara Sea or to local glaciation across the N,-- S,oriented Timan ridge."]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>words<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"order":[],"autoWidth":false,"orderClasses":false,"columnDefs":[{"orderable":false,"targets":0}]}},"evals":[],"jsHooks":[]}</script><!--/html_preserve-->
+
+The package should combine results as well.  Currently there is an `and()` function implemented, but right now it simply binds the results:
+
+
+```r
+combines <- and(coords, dates)
+```
+
+And so we can now put these together to start looking at the objects.  We might think of operating row-wise (*"I want an sentence with both dates and coordinates"*), or publication wise (*"I want a paper that includes both dates and coordinates"*).
+
+This is work that needs to be done.  We also need to think about how this would then be scaled.

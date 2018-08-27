@@ -4,10 +4,12 @@
 \alias{gddMatch}
 \title{Build matches using basic pattern matching.}
 \usage{
-gddMatch(con, table, col, pattern, rows = FALSE, name)
+gddMatch(con, name, table, col, pattern, rows = FALSE, paper = FALSE)
 }
 \arguments{
 \item{con}{A database connection to the GDD database.}
+
+\item{name}{The name used to identify the query.}
 
 \item{table}{The table of interest.}
 
@@ -17,7 +19,7 @@ gddMatch(con, table, col, pattern, rows = FALSE, name)
 
 \item{rows}{Do you want to return the explicit rows (default is FALSE)?}
 
-\item{name}{The name used to identify the query.}
+\item{paper}{Is the analysis at the sentence level or at the level of the paper? (default \code{FALSE})}
 }
 \description{
 A wrapper for the \code{DBI::dbGetQuery()} that provides support for basic pattern matching.
