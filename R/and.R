@@ -2,12 +2,16 @@
 #' @param x A \code{gddMatch} object returned by the \code{gddMatch} function.
 #' @param ... More \code{gddMatch} elements.
 #' @param rows A boolean (TRUE/FALSE), should the actual text rows be added to the resulting object?
-#'
+#' @description Working towards ombining records in GDD.
 #' @export
-and <- function(x, ...) {
+and <- function(x, ..., rows = FALSE) {
   UseMethod('and')
 }
 
+#' @title Combine gddMatch Queries
+#' @param x A \code{gddMatch} object returned by the \code{gddMatch} function.
+#' @param ... More \code{gddMatch} elements.
+#' @param rows A boolean (TRUE/FALSE), should the actual text rows be added to the resulting object?
 #' @export
 and.gddMatch <- function(x, ..., rows = FALSE) {
 

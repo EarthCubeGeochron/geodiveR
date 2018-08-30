@@ -4,6 +4,8 @@
 #' @return A \code{character} vector of length equivalent to \code{x}.
 #' @examples
 #'   library(geodiveR)
+#'   library(DBI)
+#'
 #'   con <- dbConnect(drv = "PostgreSQL",
 #'                    user = "postgres",
 #'                    password = "postgres",

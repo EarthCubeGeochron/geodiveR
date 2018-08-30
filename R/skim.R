@@ -59,7 +59,7 @@ skim.data.frame <- function(x, table = NULL,
   setseed = NULL) {
 
   if(!is.null(setseed)) {
-    assertthat::seeif(findinterval(setseed, -1:1,
+    assertthat::see_if(findInterval(setseed, -1:1,
                                    leftmost.open = TRUE,
                                    rightmost.closed = TRUE) == 1,
                     msg = "The random seed must be between -1 and 1.")
@@ -99,6 +99,8 @@ skim.PostgreSQLConnection <- function(x, table,
   column = NULL, n = 10,
   clean = TRUE, randomize = TRUE,
   setseed = NULL) {
+
+  words <- NULL
 
   assertthat::see_if(!is.null(table),
                      msg = "If `x` is a postgres connection you must supply a table name.")
@@ -144,6 +146,10 @@ skim.gddMatch <- function(x, table,
                            column = NULL, n = 10,
                            clean = TRUE, randomize = TRUE,
                            setseed = NULL) {
+
+  # For proper checks, otherwise the check assumes there's a global variable.
+  words <- NULL
+
   if (!is.null(x$rows)) {
     if(!is.null(column)) {
       assertthat::see_if(column %in% colnames(x$rows),

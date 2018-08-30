@@ -5,6 +5,7 @@
 #' @param sent A set of parsed sentence files from the NLP output.
 #' @param bib_name The name for the bibliography table in the database.
 #' @param sent_name The name for the sentence table in the database.
+#' @param clean Should rows in an existing database be removed?
 #' @importFrom RPostgreSQL dbConnect dbExistsTable dbRemoveTable
 #' @importFrom DBI dbCreateTable
 #' @importFrom readr read_file read_delim

@@ -12,6 +12,10 @@ summaryGdd(con)
 \value{
 A data.frame
 }
+\description{
+This function returns a data.frame indicating all tables,
+columns and the number of rows within a GDD database.
+}
 \details{
 Return information about the Postgres GDD database.
 }

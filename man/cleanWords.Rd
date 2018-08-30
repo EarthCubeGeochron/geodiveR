@@ -17,6 +17,8 @@ A function to render the word vector to the OCRed sentence.
 }
 \examples{
   library(geodiveR)
+  library(DBI)
+
   con <- dbConnect(drv = "PostgreSQL",
                    user = "postgres",
                    password = "postgres",

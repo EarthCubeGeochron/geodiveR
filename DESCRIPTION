@@ -20,4 +20,10 @@ Imports:
     magrittr,
     dplyr,
     assertthat,
-    DT
+    DT,
+    DBI,
+    RPostgreSQL,
+    jsonlite,
+    purrrlyr,
+    readr,
+    purrr

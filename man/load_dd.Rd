@@ -17,6 +17,8 @@ load_dd(con, bib, sent, bib_name = "publications", sent_name = "sentences",
 \item{bib_name}{The name for the bibliography table in the database.}
 
 \item{sent_name}{The name for the sentence table in the database.}
+
+\item{clean}{Should rows in an existing database be removed?}
 }
 \description{
 Takes a raw SQL file and loads it into a Postgres database.
