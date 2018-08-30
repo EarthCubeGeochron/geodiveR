@@ -37,8 +37,8 @@ gddMatch <- function(con, name, table, col, pattern, rows = FALSE, paper = FALSE
 
   if(paper == TRUE) {
 
-    paper_bool <- paste0("SELECT gddid IN (SELECT DISTINCT(gddid) FROM ",
-           table, " WHERE ", col, " ~ ?pattern) FROM ", table, " AS ", name)
+    paper_bool <- paste0("SELECT gddid IN (SELECT DISTINCT(gddid) FROM ", sql_bool, ")")
+    paper_list <- paste0("SELECT DISTINCT(gddid) FROM ", sql_bool)
     paper_query <- DBI::sqlInterpolate(con, paper_bool, pattern = pattern)
     result <- DBI::dbGetQuery(con, paper_query)
   } else {
@@ -56,7 +56,6 @@ gddMatch <- function(con, name, table, col, pattern, rows = FALSE, paper = FALSE
       return(result)
     }
   }
-
 
   result <- list(query = row_query,
                  rows = NULL,
