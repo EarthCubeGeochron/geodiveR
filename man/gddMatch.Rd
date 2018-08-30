@@ -25,6 +25,7 @@ gddMatch(con, name, table, col, pattern, rows = FALSE, paper = FALSE)
 A wrapper for the \code{DBI::dbGetQuery()} that provides support for basic pattern matching.
 }
 \examples{
+\dontrun{
 library(geodiveR)
 library(DBI)
   con <- dbConnect(drv = "PostgreSQL",
@@ -39,5 +40,5 @@ library(DBI)
                        col = 'words',
                        pattern = 'July',
                        name = "JulyQuery")
-
+}
 }

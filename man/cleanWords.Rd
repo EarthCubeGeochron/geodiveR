@@ -16,6 +16,7 @@ A \code{character} vector of length equivalent to \code{x}.
 A function to render the word vector to the OCRed sentence.
 }
 \examples{
+\dontrun{
   library(geodiveR)
   library(DBI)
 
@@ -31,5 +32,5 @@ A function to render the word vector to the OCRed sentence.
   data(publications)
 
   load_dd(con, bib = publications, sent = nlp)
-
+}
 }

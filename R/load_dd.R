@@ -7,13 +7,15 @@
 #' @param sent_name The name for the sentence table in the database.
 #' @param clean Should rows in an existing database be removed?
 #' @importFrom RPostgreSQL dbConnect dbExistsTable dbRemoveTable
-#' @importFrom DBI dbCreateTable
+#' @importFrom DBI dbCreateTable dbWriteTable
 #' @importFrom readr read_file read_delim
 #' @importFrom purrrlyr by_row
 #' @importFrom dplyr select rename combine bind_rows mutate
 #' @importFrom assertthat see_if
 #' @importFrom jsonlite fromJSON
+#' @importFrom stats na.omit
 #' @examples
+#' \dontrun{
 #' library(geodiveR)
 #' library(RPostgreSQL)
 #'   con <- dbConnect(drv = "PostgreSQL",
@@ -32,12 +34,14 @@
 #'   # publications <- "./data/bibjson"
 #'
 #'   load_dd(con, bib = publications, sent = nlp)
-#'
+#' }
 #' @export
 load_dd <- function(con, bib, sent,
                     bib_name = 'publications',
                     sent_name = 'sentences',
                     clean = TRUE) {
+
+  `_gddid` <- author <- auth <- gddid <- links <- link <- identifier <- NULL
 
   assertthat::see_if("PostgreSQLConnection" %in% class(con),
                      msg = "You must provide a valid connection to a postgres database using the dbConnect function in RPostgreSQL.")

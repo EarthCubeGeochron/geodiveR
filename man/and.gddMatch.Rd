@@ -13,3 +13,6 @@
 
 \item{rows}{A boolean (TRUE/FALSE), should the actual text rows be added to the resulting object?}
 }
+\description{
+Combine results from \code{gddMatch} into a single object.
+}

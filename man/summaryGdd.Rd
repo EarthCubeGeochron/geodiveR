@@ -20,7 +20,8 @@ columns and the number of rows within a GDD database.
 Return information about the Postgres GDD database.
 }
 \examples{
-#' library(geodiveR)
+\dontrun{
+library(geodiveR)
 library(RPostgreSQL)
   con <- dbConnect(drv = "PostgreSQL",
                    user = "postgres",
@@ -29,5 +30,5 @@ library(RPostgreSQL)
                    port = "5432",
                    dbname = "deepdive")
  summary(con)
-
+}
 }

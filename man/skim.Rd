@@ -26,6 +26,7 @@ skim(x, table = NULL, column = NULL, n = 10, clean = TRUE,
 Examine a random set of rows from a table, or a table subset
 }
 \examples{
+\dontrun{
 # Connect to a database:
 library(RPostgreSQL)
 library(geodiveR)
@@ -43,7 +44,7 @@ skim(con, 'sentences')
 coords <- gddMatch(con,
                    table = 'sentences',
                    col = 'words',
-                   pattern = '[\\\\{,][-]?[1]?[0-9]{1,2}\\\\.[0-9]{1,}[,]?[NESWnesw],',
+                   pattern = '[\\\\\{,][-]?[1]?[0-9]\{1,2\}\\.[0-9]\{1,\}[,]?[NESWnesw],',
                    name = "decdeg",
                    rows = TRUE)
 
@@ -52,7 +53,10 @@ DT::datatable(skim(coords, setseed=0.5, clean = 'replace'), )
 dates <- gddMatch(con,
                    table = 'sentences',
                    col = 'words',
-                   pattern = '(\\\\d+(?:[.]\\\\d+)*),((?:-{1,2})|(?:to)),(\\\\d+(?:[.]\\\\d+)*),([a-zA-Z]+,BP),',
+                   pattern = paste0('(\\\\d+(?:[.]\\\\d+)*),((?:-\{1,2\})|(?:to)),',
+                                    '(\\\\d+(?:[.]\\\\d+)*),([a-zA-Z]+,BP),'),
                    name = "decdeg",
                    rows = TRUE)
+}
+
 }

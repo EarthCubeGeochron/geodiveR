@@ -24,6 +24,7 @@ load_dd(con, bib, sent, bib_name = "publications", sent_name = "sentences",
 Takes a raw SQL file and loads it into a Postgres database.
 }
 \examples{
+\dontrun{
 library(geodiveR)
 library(RPostgreSQL)
   con <- dbConnect(drv = "PostgreSQL",
@@ -42,5 +43,5 @@ library(RPostgreSQL)
   # publications <- "./data/bibjson"
 
   load_dd(con, bib = publications, sent = nlp)
-
+}
 }

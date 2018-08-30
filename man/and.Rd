@@ -14,5 +14,5 @@ and(x, ..., rows = FALSE)
 \item{rows}{A boolean (TRUE/FALSE), should the actual text rows be added to the resulting object?}
 }
 \description{
-Working towards ombining records in GDD.
+Working towards combining records in GDD.
 }

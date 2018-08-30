@@ -11,6 +11,7 @@
 #' @importFrom dplyr mutate
 #' @importFrom DBI dbListTables
 #' @examples
+#' \dontrun{
 #' # Connect to a database:
 #' library(RPostgreSQL)
 #' library(geodiveR)
@@ -28,7 +29,7 @@
 #' coords <- gddMatch(con,
 #'                    table = 'sentences',
 #'                    col = 'words',
-#'                    pattern = '[\\{,][-]?[1]?[0-9]{1,2}\\.[0-9]{1,}[,]?[NESWnesw],',
+#'                    pattern = '[\\\\\\{,][-]?[1]?[0-9]\\{1,2\\}\\.[0-9]\\{1,\\}[,]?[NESWnesw],',
 #'                    name = "decdeg",
 #'                    rows = TRUE)
 #'
@@ -37,9 +38,12 @@
 #' dates <- gddMatch(con,
 #'                    table = 'sentences',
 #'                    col = 'words',
-#'                    pattern = '(\\d+(?:[.]\\d+)*),((?:-{1,2})|(?:to)),(\\d+(?:[.]\\d+)*),([a-zA-Z]+,BP),',
+#'                    pattern = paste0('(\\d+(?:[.]\\d+)*),((?:-\\{1,2\\})|(?:to)),',
+#'                                     '(\\d+(?:[.]\\d+)*),([a-zA-Z]+,BP),'),
 #'                    name = "decdeg",
 #'                    rows = TRUE)
+#' }
+#'
 #' @export
 
 skim <- function(x,
@@ -60,7 +64,7 @@ skim.data.frame <- function(x, table = NULL,
 
   if(!is.null(setseed)) {
     assertthat::see_if(findInterval(setseed, -1:1,
-                                   leftmost.open = TRUE,
+                                   left.open = TRUE,
                                    rightmost.closed = TRUE) == 1,
                     msg = "The random seed must be between -1 and 1.")
   }

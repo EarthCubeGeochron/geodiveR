@@ -3,6 +3,7 @@
 #' @param x A vector of NLP words as parsed by GDD, or a database connection.
 #' @return A \code{character} vector of length equivalent to \code{x}.
 #' @examples
+#' \dontrun{
 #'   library(geodiveR)
 #'   library(DBI)
 #'
@@ -18,7 +19,7 @@
 #'   data(publications)
 #'
 #'   load_dd(con, bib = publications, sent = nlp)
-#'
+#' }
 #' @importFrom DBI dbGetQuery
 #' @export
 

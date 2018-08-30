@@ -7,7 +7,8 @@
 #' @importFrom purrr map
 #' @export
 #' @examples
-#' #' library(geodiveR)
+#' \dontrun{
+#' library(geodiveR)
 #' library(RPostgreSQL)
 #'   con <- dbConnect(drv = "PostgreSQL",
 #'                    user = "postgres",
@@ -16,7 +17,7 @@
 #'                    port = "5432",
 #'                    dbname = "deepdive")
 #'  summary(con)
-#'
+#' }
 
 summaryGdd <- function(con) {
   assertthat::assert_that("PostgreSQLConnection" %in% class(con),

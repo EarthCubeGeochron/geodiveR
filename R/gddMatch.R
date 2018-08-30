@@ -10,6 +10,7 @@
 #' @importFrom DBI sqlInterpolate dbGetQuery
 #' @export
 #' @examples
+#' \dontrun{
 #' library(geodiveR)
 #' library(DBI)
 #'   con <- dbConnect(drv = "PostgreSQL",
@@ -24,7 +25,7 @@
 #'                        col = 'words',
 #'                        pattern = 'July',
 #'                        name = "JulyQuery")
-#'
+#'}
 
 gddMatch <- function(con, name, table, col, pattern, rows = FALSE, paper = FALSE) {
 
